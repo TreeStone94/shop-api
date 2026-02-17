@@ -1,3 +1,12 @@
 spring:
   application:
     name: shop-api
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/shop
+    username: admin
+    password: admin1!
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

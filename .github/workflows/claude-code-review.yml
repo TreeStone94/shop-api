@@ -40,7 +40,7 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Please review this pull request and provide feedback on:
+            Please review this pull request and provide feedback on(피드백 해줄때는 한국어로 해줘야해!):
             - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations

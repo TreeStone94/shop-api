@@ -1,4 +1,4 @@
-package com.github.treestone.shop_api.product.repository;
+package com.github.treestone.shop_api.product.domain;
 
 import jakarta.persistence.*;
 

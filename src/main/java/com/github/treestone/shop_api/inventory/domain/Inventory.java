@@ -2,12 +2,11 @@ package com.github.treestone.shop_api.inventory.domain;
 
 import com.github.treestone.shop_api.product.domain.Product;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Builder
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Inventory {

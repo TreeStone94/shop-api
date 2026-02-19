@@ -141,7 +141,54 @@ public class RegisterUserUseCase {
 - 의존성 주입을 통해 UseCase에 위임
 - 하나의 Controller에서 **여러 UseCase 주입 가능** (이건 괜찮음)
 - 가능하면 UseCase의 Input/Output을 HTTP DTO로 재사용
+  ```java
+    @RestController
+    @RequiredArgsConstructor
+    public class MemberController {
+    
+        private final RegisterMemberService registerMemberService;
+        
+        @PostMapping("/members")
+        public ResponseEntity<RegisterMemberService.Output> registerMember(
+            @RequestBody RegisterMemberService.Input input 
+        ) {
+            return ResponseEntity
+                .ok(registerMemberService.execute(input))
+                .build();
+        }
+    
+    }
+    ```
 - HTTP 구조가 다를 때만 전용 `XxxRequest`/`XxxResponse` 생성 (예: path variable + body)
+  ```java
+    @RestController
+    @RequiredArgsConstructor
+    public class MemberController {
+    
+        private final UpdateMemberService updateMemberService;
+        
+        @PostMapping("/members/{memberId}")
+        public ResponseEntity<UpdateMemberService.Output> updateMember(
+            @PathVariable long memberId,
+            @RequestBody UpdateMemberBody body
+        ) {
+            var input = UpdateMemberService.Input(
+                memberId,
+                body.name(),
+                body.email(),
+                body.password()
+            )
+        
+            return ResponseEntity
+                .ok(updateMemberService.execute(input))
+                .build();
+        }
+    }
+    
+    record UpdateMemberBody(String name, String email, String password) {
+    
+    }
+    ```
 - **입력 데이터 검증** (null, blank, format 체크)은 여기서 Spring Validation으로 처리
 
 **검증 분리**:

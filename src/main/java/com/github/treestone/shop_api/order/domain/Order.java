@@ -3,13 +3,12 @@ package com.github.treestone.shop_api.order.domain;
 import com.github.treestone.shop_api.product.domain.Product;
 import com.github.treestone.shop_api.user.domain.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "orders")
 @Builder
+@Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Order {

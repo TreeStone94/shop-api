@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Inventory {
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -20,4 +20,8 @@ public class Inventory {
 
 	@Embedded
 	private StockQuantity stockQuantity;
+
+	public void decreaseStockQuantity() {
+		this.stockQuantity.setQuantity(this.stockQuantity.getQuantity() - 1);
+	}
 }

@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -22,19 +24,15 @@ public class CreateOrderUseCase {
 	public record Input(Long productId, Long userId) {}
 
 	public void execute(Input input) {
-		Inventory inventory = inventoryRepository.findByProductId(input.productId);
+		Optional<Inventory> inventory = inventoryRepository.findByProductId(input.productId);
 
-		if (inventory != null) {
-			StockQuantity stockQuantity = inventory.getStockQuantity();
-			Long quantity = stockQuantity.getQuantity();
-			quantity -= 1;
-			stockQuantity.setQuantity(quantity);
-			inventory.setStockQuantity(stockQuantity);
+		if (inventory.isPresent()) {
+			inventory.get().decreaseStockQuantity();
 
-			User user = userRepository.findById(input.userId).orElse(null);
+			User user = userRepository.findById(input.userId).orElseThrow(() ->  new IllegalArgumentException("User not found"));
 
 			Order order = Order.builder()
-					.product(inventory.getProduct())
+					.product(inventory.get().getProduct())
 					.user(user)
 					.build();
 

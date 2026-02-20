@@ -6,7 +6,7 @@ import lombok.*;
 
 @Entity
 @Builder
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Inventory {
@@ -21,7 +21,4 @@ public class Inventory {
 	@Embedded
 	private StockQuantity stockQuantity;
 
-	public void decreaseStockQuantity() {
-		this.stockQuantity.setQuantity(this.stockQuantity.getQuantity() - 1);
-	}
 }

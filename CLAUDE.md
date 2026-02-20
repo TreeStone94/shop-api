@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**shop-api** is a Spring Boot 4.0.2 application built with Java 17, using Gradle 9.3.0 as the build tool. This is a REST API project that uses Spring Data JPA with MySQL as the database, and Lombok for reducing boilerplate code.
+**shop-api** is a Spring Boot 4.0.2 application built with Java 17, using Gradle 9.3.0 as the build tool. This is a REST API project focused on solving high-concurrency e-commerce scenarios (e.g., flash sales with limited inventory). It uses Spring Data JPA with MySQL as the database, and Lombok for reducing boilerplate code.
+
+**Project Goal**: Handle high-traffic scenarios where 1,000+ concurrent users compete for limited stock (e.g., 100 items), ensuring data accuracy without overselling. The project explores various concurrency control strategies including pessimistic/optimistic locking, distributed locks, and message queues.
 
 **Technology Stack:**
 - Spring Boot 4.0.2
@@ -13,6 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Spring Data JPA
 - MySQL
 - Lombok
+- Spring Validation
 - JUnit Platform for testing
 
 ## Development Commands
@@ -141,7 +144,54 @@ public class RegisterUserUseCase {
 - 의존성 주입을 통해 UseCase에 위임
 - 하나의 Controller에서 **여러 UseCase 주입 가능** (이건 괜찮음)
 - 가능하면 UseCase의 Input/Output을 HTTP DTO로 재사용
+  ```java
+    @RestController
+    @RequiredArgsConstructor
+    public class ProductController {
+
+        private final RegisterProductUseCase registerProductUseCase;
+
+        @PostMapping("/product")
+        public ResponseEntity<RegisterProductUseCase.Output> registerProduct(
+            @RequestBody RegisterProductUseCase.Input input
+        ) {
+            return ResponseEntity
+                .ok(registerProductUseCase.execute(input))
+                .build();
+        }
+
+    }
+    ```
 - HTTP 구조가 다를 때만 전용 `XxxRequest`/`XxxResponse` 생성 (예: path variable + body)
+  ```java
+    @RestController
+    @RequiredArgsConstructor
+    public class ProductController {
+
+        private final UpdateProductUseCase updateProductUseCase;
+
+        @PatchMapping("/product/{productId}")
+        public ResponseEntity<UpdateProductUseCase.Output> updateProduct(
+            @PathVariable long productId,
+            @RequestBody UpdateProductBody body
+        ) {
+            var input = new UpdateProductUseCase.Input(
+                productId,
+                body.name(),
+                body.description(),
+                body.image()
+            );
+
+            return ResponseEntity
+                .ok(updateProductUseCase.execute(input))
+                .build();
+        }
+    }
+
+    record UpdateProductBody(String name, String description, String image) {
+
+    }
+    ```
 - **입력 데이터 검증** (null, blank, format 체크)은 여기서 Spring Validation으로 처리
 
 **검증 분리**:
@@ -192,5 +242,8 @@ The project uses MySQL, so ensure you have:
 Key dependencies are managed through Gradle:
 - `spring-boot-starter-data-jpa` - JPA/Hibernate support
 - `spring-boot-starter-webmvc` - Web MVC and REST support
+- `spring-boot-starter-validation` - Bean validation with Hibernate Validator
 - `mysql-connector-j` - MySQL JDBC driver
 - `lombok` - Code generation at compile time
+- `spring-boot-starter-data-jpa-test` - Testing support for JPA (test scope)
+- `spring-boot-starter-webmvc-test` - Testing support for Web MVC (test scope)

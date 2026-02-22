@@ -1,7 +1,8 @@
 package com.github.treestone.shop_api.order.usecase;
 
-import com.github.treestone.shop_api.inventory.domain.Inventory;
-import com.github.treestone.shop_api.inventory.port.InventoryRepository;
+
+import com.github.treestone.shop_api.inventory.usecase.DecreaseStockUseCase;
+import com.github.treestone.shop_api.inventory.usecase.DecreaseStockWithOptimisticLockUseCase;
 import com.github.treestone.shop_api.order.domain.Order;
 import com.github.treestone.shop_api.order.port.OrderRepository;
 import com.github.treestone.shop_api.user.domain.User;
@@ -11,28 +12,33 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class CreateOrderUseCase {
 	private final OrderRepository orderRepository;
 	private final UserRepository userRepository;
-	private final InventoryRepository inventoryRepository;
+//	private final DecreaseStockUseCase decreaseStockUseCase;
+	private final DecreaseStockWithOptimisticLockUseCase decreaseStockWithOptimisticLockUseCase;
 
-	public record Input(@NotNull Long productId, @NotNull Long userId) {}
+	public record Input(@NotNull Long productId, @NotNull Long userId) {
+	}
 
 	public void execute(Input input) {
-		Optional<Inventory> inventory = inventoryRepository.findByProductId(input.productId);
+//		DecreaseStockUseCase.Output output = decreaseStockUseCase.execute(
+//				new DecreaseStockUseCase.Input(input.productId())
+//		);
 
-		if (inventory.isPresent()) {
-			inventory.get().getStockQuantity().decreaseStockQuantity();
+		DecreaseStockWithOptimisticLockUseCase.Output output = decreaseStockWithOptimisticLockUseCase.execute(
+				new DecreaseStockWithOptimisticLockUseCase.Input(input.productId())
+		);
 
-			User user = userRepository.findById(input.userId).orElseThrow(() ->  new IllegalArgumentException("User not found"));
+		if (output != null) {
+			User user = userRepository.findById(input.userId)
+					.orElseThrow(() -> new IllegalArgumentException("User not found"));
 
 			Order order = Order.builder()
-					.product(inventory.get().getProduct())
+					.product(output.product())
 					.user(user)
 					.build();
 

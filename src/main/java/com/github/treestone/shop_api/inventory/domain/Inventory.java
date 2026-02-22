@@ -21,4 +21,9 @@ public class Inventory {
 	@Embedded
 	private StockQuantity stockQuantity;
 
+	@Version
+	@Column(nullable = false)
+	@Builder.Default
+	private Long version = 1L;
+
 }

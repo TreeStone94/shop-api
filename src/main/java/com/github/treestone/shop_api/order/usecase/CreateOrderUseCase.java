@@ -3,6 +3,7 @@ package com.github.treestone.shop_api.order.usecase;
 
 import com.github.treestone.shop_api.inventory.usecase.DecreaseStockUseCase;
 import com.github.treestone.shop_api.inventory.usecase.DecreaseStockWithOptimisticLockUseCase;
+import com.github.treestone.shop_api.inventory.usecase.DecreaseStockWithPessimisticLockUseCase;
 import com.github.treestone.shop_api.order.domain.Order;
 import com.github.treestone.shop_api.order.port.OrderRepository;
 import com.github.treestone.shop_api.user.domain.User;
@@ -19,7 +20,8 @@ public class CreateOrderUseCase {
 	private final OrderRepository orderRepository;
 	private final UserRepository userRepository;
 //	private final DecreaseStockUseCase decreaseStockUseCase;
-	private final DecreaseStockWithOptimisticLockUseCase decreaseStockWithOptimisticLockUseCase;
+//	private final DecreaseStockWithOptimisticLockUseCase decreaseStockWithOptimisticLockUseCase;
+	private final DecreaseStockWithPessimisticLockUseCase decreaseStockWithPessimisticLockUseCase;
 
 	public record Input(@NotNull Long productId, @NotNull Long userId) {
 	}
@@ -29,8 +31,12 @@ public class CreateOrderUseCase {
 //				new DecreaseStockUseCase.Input(input.productId())
 //		);
 
-		DecreaseStockWithOptimisticLockUseCase.Output output = decreaseStockWithOptimisticLockUseCase.execute(
-				new DecreaseStockWithOptimisticLockUseCase.Input(input.productId())
+//		DecreaseStockWithOptimisticLockUseCase.Output output = decreaseStockWithOptimisticLockUseCase.execute(
+//				new DecreaseStockWithOptimisticLockUseCase.Input(input.productId())
+//		);
+
+		DecreaseStockWithPessimisticLockUseCase.Output output = decreaseStockWithPessimisticLockUseCase.execute(
+				new DecreaseStockWithPessimisticLockUseCase.Input(input.productId())
 		);
 
 		if (output != null) {

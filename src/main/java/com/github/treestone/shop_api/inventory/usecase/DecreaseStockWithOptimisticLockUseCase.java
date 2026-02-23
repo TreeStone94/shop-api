@@ -1,19 +1,17 @@
 package com.github.treestone.shop_api.inventory.usecase;
 
-import com.github.treestone.shop_api.inventory.domain.Inventory;
-import com.github.treestone.shop_api.inventory.port.InventoryRepository;
+import com.github.treestone.shop_api.inventory.processor.InventoryProcessor;
 import com.github.treestone.shop_api.product.domain.Product;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class DecreaseStockWithOptimisticLockUseCase {
 	private static final int MAX_RETRY_COUNT = 3;
-	private final InventoryRepository inventoryRepository;
+	private final InventoryProcessor inventoryProcessor;
 
 	public record Input(@NotNull Long productId) {}
 	public record Output(Product product) {}
@@ -23,7 +21,7 @@ public class DecreaseStockWithOptimisticLockUseCase {
 
 		while (retryCount < MAX_RETRY_COUNT) {
 			try {
-				return decreaseStock(input);
+				return new Output(inventoryProcessor.decreaseStockWithOptimisticLock(input.productId()).getProduct());
 			} catch (ObjectOptimisticLockingFailureException e) {
 				retryCount++;
 
@@ -42,16 +40,5 @@ public class DecreaseStockWithOptimisticLockUseCase {
 		}
 
 		throw new IllegalStateException("도달할 수 없는 코드");
-	}
-
-	@Transactional
-	protected Output decreaseStock(Input input) {
-		Inventory inventory = inventoryRepository
-			.findByProductIdWithOptimisticLock(input.productId())
-			.orElseThrow(() -> new IllegalArgumentException("재고를 찾을 수 없습니다"));
-
-		inventory.getStockQuantity().decreaseStockQuantity();
-
-		return new Output(inventory.getProduct());
 	}
 }

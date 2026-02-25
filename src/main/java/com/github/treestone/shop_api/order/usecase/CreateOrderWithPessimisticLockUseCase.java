@@ -28,7 +28,7 @@ public class CreateOrderWithPessimisticLockUseCase {
 		inventory.getStockQuantity().decreaseStockQuantity();
 
 		User user = userRepository.findById(input.userId())
-				.orElseThrow(() -> new IllegalArgumentException("User not found"));
+				.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
 		Order order = Order.builder()
 				.product(inventory.getProduct())

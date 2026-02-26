@@ -22,13 +22,13 @@ public class CreateOrderWithPessimisticLockUseCase {
 	public record Input(@NotNull Long userId, @NotNull Long productId) {}
 
 	public void execute(Input input) {
+		User user = userRepository.findById(input.userId())
+				.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
 		Inventory inventory = inventoryRepository.findByProductIdWithPessimisticLock(input.productId())
 				.orElseThrow(() -> new IllegalArgumentException("재고를 찾을 수 없습니다."));
 
 		inventory.getStockQuantity().decreaseStockQuantity();
-
-		User user = userRepository.findById(input.userId())
-				.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
 		Order order = Order.builder()
 				.product(inventory.getProduct())

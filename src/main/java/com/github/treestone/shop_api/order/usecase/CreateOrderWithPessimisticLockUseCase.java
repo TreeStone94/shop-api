@@ -11,35 +11,31 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CreateOrderUseCase {
+public class CreateOrderWithPessimisticLockUseCase {
 	private final OrderRepository orderRepository;
 	private final UserRepository userRepository;
 	private final InventoryRepository inventoryRepository;
 
-	public record Input(@NotNull Long productId, @NotNull Long userId) {}
+	public record Input(@NotNull Long userId, @NotNull Long productId) {}
 
 	public void execute(Input input) {
-		Optional<Inventory> inventory = inventoryRepository.findByProductId(input.productId);
+		User user = userRepository.findById(input.userId())
+				.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-		if (inventory.isPresent()) {
-			inventory.get().getStockQuantity().decreaseStockQuantity();
+		Inventory inventory = inventoryRepository.findByProductIdWithPessimisticLock(input.productId())
+				.orElseThrow(() -> new IllegalArgumentException("재고를 찾을 수 없습니다."));
 
-			User user = userRepository.findById(input.userId).orElseThrow(() ->  new IllegalArgumentException("User not found"));
+		inventory.getStockQuantity().decreaseStockQuantity();
 
-			Order order = Order.builder()
-					.product(inventory.get().getProduct())
-					.user(user)
-					.build();
+		Order order = Order.builder()
+				.product(inventory.getProduct())
+				.user(user)
+				.build();
 
-			orderRepository.save(order);
-		} else {
-			throw new IllegalArgumentException("Product not found");
-		}
+		orderRepository.save(order);
 
 	}
 }

@@ -30,7 +30,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework:spring-aspects'
 	implementation 'org.springframework.retry:spring-retry:2.0.11'
-	implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
+	implementation 'org.redisson:redisson-spring-boot-starter:4.2.0'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
